@@ -3,9 +3,10 @@ import { TrainerService } from './trainer.service';
 import { TrainerController } from './trainer.controller';
 import { Trainer } from './entities/trainer.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { Subject } from 'src/subject/entities/subject.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Trainer])],
+  imports: [TypeOrmModule.forFeature([Trainer, Subject])],
   controllers: [TrainerController],
   providers: [TrainerService],
 })

@@ -12,7 +12,9 @@ import {
   JoinColumn,
   OneToOne,
   Index,
+  ManyToMany,
 } from 'typeorm';
+import { Subject } from 'src/subject/entities/subject.entity';
 
 @Entity()
 export class Trainer {
@@ -55,4 +57,7 @@ export class Trainer {
 
   @OneToMany(() => StudentGrade, (sg) => sg.trainer, { cascade: true })
   studentGrades: StudentGrade[];
+
+  @ManyToMany(() => Subject, (s) => s.trainers, { cascade: false })
+  subjects: Subject[];
 }

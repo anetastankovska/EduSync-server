@@ -8,10 +8,12 @@ import {
   JoinColumn,
   Index,
   OneToOne,
+  ManyToMany,
 } from 'typeorm';
 import { Academy } from 'src/academy/entities/academy.entity';
 import { StudentGrade } from 'src/student-grade/entities/student-grade.entity';
 import { TrainerReview } from 'src/trainer-review/entities/trainer-review.entity';
+import { Subject } from 'src/subject/entities/subject.entity';
 
 @Entity()
 export class Student {
@@ -59,4 +61,7 @@ export class Student {
 
   @OneToMany(() => TrainerReview, (tr) => tr.student, { cascade: true })
   trainerReviews: TrainerReview[];
+
+  @ManyToMany(() => Subject, (s) => s.students, { cascade: false })
+  subjects: Subject[];
 }

@@ -11,6 +11,7 @@ import {
   ParseIntPipe,
   UseGuards,
   Req,
+  Put,
 } from '@nestjs/common';
 import { StudentService } from './student.service';
 import { CreateStudentDto } from './dto/create-student.dto';
@@ -133,5 +134,18 @@ export class StudentController {
   ): Promise<{ status: string; message: string }> {
     await this.studentService.remove(id);
     return { status: 'success', message: 'Student successfully removed.' };
+  }
+
+  @Patch(':id/academy')
+  updateAcademy(
+    @Param('id', ParseIntPipe) id: number,
+    @Body('academyId', ParseIntPipe) academyId: number,
+  ) {
+    return this.studentService.setAcademy(id, academyId);
+  }
+
+  @Put(':id/subjects')
+  setSubjects(@Param('id', ParseIntPipe) id: number, @Body() dto) {
+    return this.studentService.setSubjects(id, dto.subjectIds);
   }
 }

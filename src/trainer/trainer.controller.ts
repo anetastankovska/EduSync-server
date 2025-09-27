@@ -13,6 +13,7 @@ import {
   UseGuards,
   Req,
   ParseIntPipe,
+  Put,
 } from '@nestjs/common';
 import { TrainerService } from './trainer.service';
 import { CreateTrainerDto } from './dto/create-trainer.dto';
@@ -115,5 +116,18 @@ export class TrainerController {
         message: 'Failed to remove trainer. ' + error.message,
       });
     }
+  }
+
+  @Patch(':id/academy')
+  updateAcademy(
+    @Param('id', ParseIntPipe) id: number,
+    @Body('academyId', ParseIntPipe) academyId: number,
+  ) {
+    return this.trainerService.setAcademy(id, academyId);
+  }
+
+  @Put(':id/subjects')
+  setSubjects(@Param('id', ParseIntPipe) id: number, @Body() dto) {
+    return this.trainerService.setSubjects(id, dto.subjectIds);
   }
 }

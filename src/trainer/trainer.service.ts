@@ -1,15 +1,20 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateTrainerDto } from './dto/create-trainer.dto';
 import { UpdateTrainerDto } from './dto/update-trainer.dto';
 import { Trainer } from './entities/trainer.entity';
-import { Repository } from 'typeorm';
+import { Subject } from 'src/subject/entities/subject.entity';
+import { In, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class TrainerService {
   constructor(
-    @InjectRepository(Trainer)
-    private trainerRepository: Repository<Trainer>,
+    @InjectRepository(Trainer) private trainerRepository: Repository<Trainer>,
+    @InjectRepository(Subject) private subjectRepository: Repository<Subject>,
   ) {}
 
   async findAll(
@@ -69,6 +74,30 @@ export class TrainerService {
     const t = await this.trainerRepository.findOne({ where: { userId } });
     if (!t) throw new NotFoundException('Trainer not found');
     this.trainerRepository.merge(t, dto);
+    return this.trainerRepository.save(t);
+  }
+
+  async setAcademy(id: number, academyId: number) {
+    const t = await this.trainerRepository.findOne({ where: { id } });
+    if (!t) throw new NotFoundException('Trainer not found');
+    t.academyId = academyId ?? null;
+    return this.trainerRepository.save(t);
+  }
+
+  async setSubjects(id: number, subjectIds: number[]) {
+    const t = await this.trainerRepository.findOne({
+      where: { id },
+      relations: ['subjects'],
+    });
+    if (!t) throw new NotFoundException('Trainer not found');
+    if (!t.academyId) throw new BadRequestException('Assign academy first');
+
+    const subs = await this.subjectRepository.findBy({ id: In(subjectIds) });
+    // ensure all subjects belong to trainer’s academy
+    if (subs.some((s) => s.academyId !== t.academyId)) {
+      throw new BadRequestException('Subject not in trainer academy');
+    }
+    t.subjects = subs;
     return this.trainerRepository.save(t);
   }
 }
