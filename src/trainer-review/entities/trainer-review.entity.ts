@@ -6,6 +6,9 @@ import {
   Column,
   ManyToOne,
   JoinColumn,
+  Index,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 
 @Entity({ name: 'trainer_review' })
@@ -13,25 +16,33 @@ export class TrainerReview {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ type: 'smallint' })
   grade: number;
 
-  @Column()
+  @Column({ type: 'varchar', length: 500 })
   description: string;
 
-  // ← who is being reviewed
+  // who is being reviewed
   @ManyToOne(() => Trainer, (t) => t.trainerReviews, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'trainerId' })
   trainer: Trainer;
 
+  @Index()
   @Column()
   trainerId: number;
 
-  // ← who wrote the review
+  // who wrote the review
   @ManyToOne(() => Student, (s) => s.trainerReviews, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'studentId' })
   student: Student;
 
+  @Index()
   @Column()
   studentId: number;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 }

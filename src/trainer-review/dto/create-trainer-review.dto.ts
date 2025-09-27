@@ -1,4 +1,12 @@
-import { IsString, IsInt, Min, IsNotEmpty, Max } from 'class-validator';
+import {
+  IsString,
+  IsInt,
+  Min,
+  IsNotEmpty,
+  Max,
+  MaxLength,
+} from 'class-validator';
+
 export class CreateTrainerReviewDto {
   @IsNotEmpty()
   @IsInt()
@@ -8,5 +16,6 @@ export class CreateTrainerReviewDto {
 
   @IsNotEmpty()
   @IsString()
+  @MaxLength(500)
   readonly description: string;
 }

@@ -3,7 +3,6 @@ import { Difficulty } from 'src/util/difficulty.enum';
 
 // Global swagger configured in nest-cli.json
 export class CreateSubjectDto {
-  @IsNotEmpty()
   @IsString()
   @IsNotEmpty()
   readonly name: string;
@@ -17,7 +16,6 @@ export class CreateSubjectDto {
   @IsEnum(Difficulty)
   readonly difficulty: Difficulty;
 
-  @IsNotEmpty()
   @IsInt()
   @IsNotEmpty()
   readonly academyId: number;

@@ -6,15 +6,13 @@ import {
   Patch,
   Param,
   Delete,
-  HttpStatus,
-  Res,
   UseGuards,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { AcademyService } from './academy.service';
 import { CreateAcademyDto } from './dto/create-academy.dto';
 import { UpdateAcademyDto } from './dto/update-academy.dto';
 import { Academy } from './entities/academy.entity';
-import { Response } from 'express';
 import {
   ApiBearerAuth,
   ApiCreatedResponse,
@@ -50,8 +48,8 @@ export class AcademyController {
     description: 'Academy retrieved successfully',
   })
   @Get(':id')
-  findOne(@Param('id') id: string): Promise<Academy> {
-    return this.academyService.findOne(+id);
+  findOne(@Param('id', ParseIntPipe) id: number): Promise<Academy> {
+    return this.academyService.findOne(id);
   }
 
   @ApiOperation({ summary: 'Retrieves academy by name' })
@@ -59,9 +57,8 @@ export class AcademyController {
     type: [Academy],
     description: 'Academy retrieved successfully',
   })
-  // Via path parameters
-  @Get('/name/:name')
-  async getByName(@Param('name') name: string) {
+  @Get('name/:name')
+  getByName(@Param('name') name: string) {
     return this.academyService.findByName(name);
   }
 
@@ -72,44 +69,29 @@ export class AcademyController {
   })
   @Post()
   @Roles(Role.Admin)
-  create(@Body() createAcademyDto: CreateAcademyDto): Promise<Academy> {
-    return this.academyService.create(createAcademyDto);
+  create(@Body() dto: CreateAcademyDto): Promise<Academy> {
+    return this.academyService.create(dto);
   }
 
   @ApiOperation({ summary: 'Updates an academy by id' })
-  @ApiOkResponse({
-    type: Academy,
-    description: 'Academy updated successfully',
-  })
+  @ApiOkResponse({ type: Academy, description: 'Academy updated successfully' })
   @Patch(':id')
   @Roles(Role.Admin)
   update(
-    @Param('id') id: string,
-    @Body() updateAcademyDto: UpdateAcademyDto,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateAcademyDto,
   ): Promise<Academy> {
-    return this.academyService.update(+id, updateAcademyDto);
+    return this.academyService.update(id, dto);
   }
 
   @ApiOperation({ summary: 'Deletes an academy by id' })
-  @ApiOkResponse({
-    description: 'Academy deleted successfully',
-  })
+  @ApiOkResponse({ description: 'Academy deleted successfully' })
   @Delete(':id')
+  @Roles(Role.Admin)
   async remove(
-    @Param('id') id: string,
-    @Res({ passthrough: true }) res: Response,
-  ): Promise<void> {
-    try {
-      await this.academyService.remove(+id);
-      res.status(HttpStatus.OK).json({
-        status: 'success',
-        message: 'Academy successfully removed.',
-      });
-    } catch (error) {
-      res.status(HttpStatus.NOT_FOUND).json({
-        status: 'error',
-        message: 'Failed to remove academy. ' + error.message,
-      });
-    }
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<{ status: string; message: string }> {
+    await this.academyService.remove(id);
+    return { status: 'success', message: 'Academy successfully removed.' };
   }
 }

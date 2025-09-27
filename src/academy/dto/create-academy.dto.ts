@@ -26,11 +26,11 @@ export class CreateAcademyDto {
   // })
   @IsNotEmpty()
   @IsDateString()
-  readonly startDate: Date;
+  readonly startDate: string;
 
   @IsNotEmpty()
   @IsDateString()
-  readonly endDate: Date;
+  readonly endDate: string;
 
   @IsNotEmpty()
   @IsInt()

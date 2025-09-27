@@ -16,7 +16,6 @@ export class AcademyService {
     return this.academyRepository.find({
       relations: { students: true, subjects: true, trainers: true },
     });
-    // return this.academyRepository.find();
   }
 
   // async findOne(id: number): Promise<Academy> {
@@ -24,14 +23,13 @@ export class AcademyService {
   // }
 
   async findOne(id: number): Promise<Academy> {
-    // findOneOrFail from a repository typically throws an EntityNotFoundError if no entity is found with the provided criteria
     try {
-      return await this.academyRepository.findOneByOrFail({ id });
+      return await this.academyRepository.findOneOrFail({
+        where: { id },
+        relations: { students: true, subjects: true, trainers: true },
+      });
     } catch (error) {
-      if (error.name === 'EntityNotFoundError') {
-        throw new NotFoundException(`Academy with ID ${id} not found`);
-      }
-      throw error; // rethrow the error if it's not the expected error type
+      throw new NotFoundException(`Academy with ID ${id} not found`);
     }
   }
 
@@ -45,17 +43,20 @@ export class AcademyService {
     id: number,
     updateAcademyDto: UpdateAcademyDto,
   ): Promise<Academy> {
-    let academy = await this.academyRepository.findOneBy({ id });
-    academy = this.academyRepository.merge(academy, updateAcademyDto);
-    await this.academyRepository.save(academy);
-    return academy;
+    const academy = await this.academyRepository.findOne({ where: { id } });
+    if (!academy)
+      throw new NotFoundException(`Academy with ID ${id} not found`);
+
+    const merged = this.academyRepository.merge(academy, updateAcademyDto);
+    await this.academyRepository.save(merged);
+    return merged;
   }
 
   async remove(id: number): Promise<void> {
     // !!! need to add await here because we need the check the result from the operation
     const result = await this.academyRepository.delete(id);
-    if (result.affected === 0) {
-      throw new Error('No academy found with the provided id.');
+    if (!result.affected) {
+      throw new NotFoundException(`Academy with ID ${id} not found`);
     }
   }
 
@@ -67,15 +68,9 @@ export class AcademyService {
   // }
 
   async findByName(name: string): Promise<Academy[]> {
-    // Convert the input name to lowercase in JavaScript
-    const lowercasedName = name.toLowerCase();
-
-    // Use LOWER() in SQL to make the comparison case-insensitive
-    const query = `SELECT * FROM academy WHERE LOWER(name) = LOWER($1)`;
-    const academies = await this.academyRepository.query(query, [
-      lowercasedName,
-    ]);
-
-    return academies;
+    return this.academyRepository
+      .createQueryBuilder('academy')
+      .where('academy.name ILIKE :name', { name }) // exact match ignoring case
+      .getMany();
   }
 }

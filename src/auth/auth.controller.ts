@@ -1,15 +1,23 @@
-import { Post, Body, HttpStatus, Controller } from '@nestjs/common';
+import {
+  Post,
+  Body,
+  HttpStatus,
+  Controller,
+  HttpCode,
+  Get,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ApiOperation, ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { RegisterUserDto } from './dto/register-user.dto';
 import { LoginUsersDto } from './dto/login-user.dto';
 
 @ApiTags('Auth')
-@Controller()
+@Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('login')
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Logs in a user' })
   @ApiBody({ type: LoginUsersDto })
   @ApiResponse({
@@ -31,5 +39,10 @@ export class AuthController {
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Bad Request' })
   register(@Body() registerDto: RegisterUserDto) {
     return this.authService.register(registerDto);
+  }
+
+  @Get('ane')
+  async getAne(): Promise<string> {
+    return 'Ane';
   }
 }

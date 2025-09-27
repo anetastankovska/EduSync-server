@@ -14,11 +14,11 @@ export class Academy {
   @Column()
   description: string;
 
-  @Column()
-  startDate: Date;
+  @Column({ type: 'date' })
+  startDate: string;
 
-  @Column()
-  endDate: Date;
+  @Column({ type: 'date' })
+  endDate: string;
 
   @Column()
   price: number;

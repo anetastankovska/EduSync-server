@@ -1,3 +1,4 @@
+// src/trainer/trainer.controller.ts
 import {
   Controller,
   Get,
@@ -9,6 +10,9 @@ import {
   Res,
   HttpStatus,
   Query,
+  UseGuards,
+  Req,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { TrainerService } from './trainer.service';
 import { CreateTrainerDto } from './dto/create-trainer.dto';
@@ -20,84 +24,87 @@ import {
   ApiTags,
   ApiOkResponse,
   ApiCreatedResponse,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { Trainer } from './entities/trainer.entity';
+import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
 
 @ApiTags('Trainer')
+@ApiBearerAuth()
 @Controller('trainer')
 export class TrainerController {
   constructor(private readonly trainerService: TrainerService) {}
 
-  @ApiOperation({
-    summary:
-      'Retrieves all trainers. Optionaly filters the result by name, academy id, and seniority',
-  })
-  @ApiOkResponse({
-    type: [Trainer],
-    description: 'Trainers retrieved successfully',
-  })
-  @Get()
-  @ApiQuery({
-    name: 'name',
-    required: false,
-  })
-  @ApiQuery({
-    name: 'academyId',
-    required: false,
-  })
-  @ApiQuery({
-    name: 'seniority',
-    required: false,
-  })
-  findAll(
-    @Query('name') name: string,
-    @Query('academyId') academyId: number,
-    @Query('seniority') seniority: string,
-  ) {
-    return this.trainerService.findAll(name, academyId, seniority);
+  // ---------- STATIC 'me' ROUTES FIRST ----------
+  @UseGuards(JwtAuthGuard)
+  @Get('me')
+  @ApiOperation({ summary: 'Get my trainer profile (by JWT user id)' })
+  @ApiOkResponse({ type: Trainer, description: 'Trainer loaded' })
+  getMe(@Req() req: any) {
+    return this.trainerService.findByUserId(req.user.sub);
   }
 
-  @ApiOperation({ summary: 'Retrieves a trainer by id' })
-  @ApiOkResponse({
-    type: Trainer,
-    description: 'Trainer retrieved successfully',
+  @UseGuards(JwtAuthGuard)
+  @Patch('me')
+  @ApiOperation({ summary: 'Update my trainer profile' })
+  @ApiOkResponse({ type: Trainer, description: 'Trainer updated' })
+  updateMe(@Req() req: any, @Body() dto: UpdateTrainerDto) {
+    return this.trainerService.updateByUserId(req.user.sub, dto);
+  }
+
+  // ---------- COLLECTION & CREATE ----------
+  @ApiOperation({
+    summary:
+      'Retrieves all trainers. Optionally filter by name, academyId, and seniority',
   })
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.trainerService.findOne(+id);
+  @ApiOkResponse({ type: [Trainer], description: 'Trainers retrieved' })
+  @Get()
+  @ApiQuery({ name: 'name', required: false })
+  @ApiQuery({ name: 'academyId', required: false })
+  @ApiQuery({ name: 'seniority', required: false })
+  findAll(
+    @Query('name') name?: string,
+    @Query('academyId') academyId?: number,
+    @Query('seniority') seniority?: string,
+  ) {
+    return this.trainerService.findAll(
+      name,
+      academyId ? Number(academyId) : undefined,
+      seniority,
+    );
   }
 
   @ApiOperation({ summary: 'Creates a trainer' })
-  @ApiCreatedResponse({
-    type: Trainer,
-    description: 'Trainer created successfully',
-  })
+  @ApiCreatedResponse({ type: Trainer, description: 'Trainer created' })
   @Post()
-  create(@Body() createTrainerDto: CreateTrainerDto) {
-    return this.trainerService.create(createTrainerDto);
+  create(@Body() dto: CreateTrainerDto) {
+    return this.trainerService.create(dto);
+  }
+
+  // ---------- ID ROUTES LAST ----------
+  @ApiOperation({ summary: 'Retrieves a trainer by id' })
+  @ApiOkResponse({ type: Trainer, description: 'Trainer retrieved' })
+  @Get(':id')
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.trainerService.findOne(id);
   }
 
   @ApiOperation({ summary: 'Updates a trainer by id' })
-  @ApiOkResponse({
-    type: Trainer,
-    description: 'Updated a trainer successfully',
-  })
+  @ApiOkResponse({ type: Trainer, description: 'Trainer updated' })
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTrainerDto: UpdateTrainerDto) {
-    return this.trainerService.update(+id, updateTrainerDto);
+  update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateTrainerDto) {
+    return this.trainerService.update(id, dto);
   }
 
   @ApiOperation({ summary: 'Deletes a trainer by id' })
-  @ApiOkResponse({
-    description: 'Trainer deleted successfully',
-  })
+  @ApiOkResponse({ description: 'Trainer deleted' })
   @Delete(':id')
   async remove(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Res({ passthrough: true }) res: Response,
   ): Promise<void> {
     try {
-      await this.trainerService.remove(+id);
+      await this.trainerService.remove(id);
       res.status(HttpStatus.OK).json({
         status: 'success',
         message: 'Trainer successfully removed.',

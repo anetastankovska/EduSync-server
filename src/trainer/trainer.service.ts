@@ -58,4 +58,17 @@ export class TrainerService {
       throw new Error('No trainer found with the provided id.');
     }
   }
+
+  async findByUserId(userId: number): Promise<Trainer> {
+    const trainer = await this.trainerRepository.findOne({ where: { userId } });
+    if (!trainer) throw new NotFoundException('Trainer not found');
+    return trainer;
+  }
+
+  async updateByUserId(userId: number, dto: UpdateTrainerDto) {
+    const t = await this.trainerRepository.findOne({ where: { userId } });
+    if (!t) throw new NotFoundException('Trainer not found');
+    this.trainerRepository.merge(t, dto);
+    return this.trainerRepository.save(t);
+  }
 }

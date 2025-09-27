@@ -1,35 +1,41 @@
-import { Type } from 'class-transformer';
+// src/student/dto/create-student.dto.ts
 import {
-  IsString,
+  IsEmail,
   IsInt,
-  Min,
-  MinLength,
-  IsObject,
-  ValidateNested,
   IsNotEmpty,
+  IsOptional,
+  IsString,
+  MaxLength,
+  Min,
+  IsDateString,
 } from 'class-validator';
-import { CreateStudentDetailDto } from 'src/student-details/dto/create-student-detail.dto';
+
 export class CreateStudentDto {
   @IsNotEmpty()
   @IsString()
-  @MinLength(3)
+  @MaxLength(100)
   readonly name: string;
 
   @IsNotEmpty()
-  @IsString()
+  @IsEmail()
   readonly email: string;
 
-  @IsInt()
-  @Min(18)
-  readonly age: number;
-
-  @IsNotEmpty()
+  @IsOptional()
   @IsInt()
   readonly academyId: number;
 
-  @IsNotEmpty()
-  @IsObject()
-  @ValidateNested()
-  @Type(() => CreateStudentDetailDto)
-  studentDetail: CreateStudentDetailDto;
+  // ⬇️ flattened optional details
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  readonly address?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(30)
+  readonly telephone?: string;
+
+  @IsOptional()
+  @IsDateString()
+  readonly dateOfBirth?: string; // 'YYYY-MM-DD'
 }

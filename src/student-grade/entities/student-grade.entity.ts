@@ -7,6 +7,9 @@ import {
   Column,
   ManyToOne,
   JoinColumn,
+  Index,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 
 @Entity({ name: 'student_grade' })
@@ -14,27 +17,37 @@ export class StudentGrade {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
-  grade: number;
+  @Column({ type: 'smallint', nullable: true })
+  grade: number | null;
 
-  @Column()
-  description: string;
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  description: string | null;
 
-  // ← this bit must exist:
   @ManyToOne(() => Student, (student) => student.studentGrades, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'studentId' })
   student: Student;
 
+  @Index()
   @Column()
   studentId: number;
 
   // ← and if you’re tracking which trainer gave it:
-  @ManyToOne(() => Trainer, (trainer) => trainer.studentGrades)
+  @ManyToOne(() => Trainer, (trainer) => trainer.studentGrades, {
+    onDelete: 'SET NULL',
+    nullable: true,
+  })
   @JoinColumn({ name: 'trainerId' })
-  trainer: Trainer;
+  trainer?: Trainer | null;
 
-  @Column()
-  trainerId: number;
+  @Index()
+  @Column({ nullable: true })
+  trainerId?: number | null;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 }

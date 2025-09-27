@@ -17,7 +17,6 @@ export class Subject {
   @Column()
   name: string;
 
-  @IsPositive()
   @Column()
   numberOfClasses: number;
 

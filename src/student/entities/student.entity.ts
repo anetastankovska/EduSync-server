@@ -1,39 +1,62 @@
-import { Academy } from 'src/academy/entities/academy.entity';
-import { StudentDetail } from 'src/student-details/entities/student-detail.entity';
-import { StudentGrade } from 'src/student-grade/entities/student-grade.entity';
-import { TrainerReview } from 'src/trainer-review/entities/trainer-review.entity';
+import { User } from 'src/user/entities/user.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  Check,
   ManyToOne,
-  OneToOne,
   OneToMany,
   JoinColumn,
+  Index,
+  OneToOne,
 } from 'typeorm';
+import { Academy } from 'src/academy/entities/academy.entity';
+import { StudentGrade } from 'src/student-grade/entities/student-grade.entity';
+import { TrainerReview } from 'src/trainer-review/entities/trainer-review.entity';
 
 @Entity()
 export class Student {
-  @PrimaryGeneratedColumn() id: number;
-  @Column({ length: 100 }) name: string;
-  @Column({ length: 30 }) email: string;
-  @Column({ nullable: true }) @Check(`"age" >= 18`) age: number;
+  @PrimaryGeneratedColumn()
+  id: number;
 
-  @ManyToOne(() => Academy, (a) => a.students)
+  // NEW: link to the owning user (1:1)
+  @OneToOne(() => User, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'userId' })
+  user: User;
+
+  @Index({ unique: true })
+  @Column()
+  userId: number;
+
+  @Column({ length: 100 })
+  name: string;
+
+  @Index({ unique: true })
+  @Column({ length: 255 })
+  email: string;
+
+  @ManyToOne(() => Academy, (a) => a.students, {
+    onDelete: 'SET NULL',
+    nullable: true,
+  })
   @JoinColumn({ name: 'academyId' })
-  academy: Academy;
-  @Column() academyId: number;
+  academy: Academy | null;
 
-  @OneToOne(() => StudentDetail, (sd) => sd.student, { cascade: true })
-  @JoinColumn()
-  studentDetail: StudentDetail;
+  @Column({ nullable: true })
+  academyId: number | null;
 
-  // grades *received* from trainers
+  // flattened details (optional is OK)
+  @Column({ length: 200, nullable: true })
+  address: string | null;
+
+  @Column({ length: 30, nullable: true })
+  telephone: string | null;
+
+  @Column({ type: 'date', nullable: true })
+  dateOfBirth: string | null;
+
   @OneToMany(() => StudentGrade, (sg) => sg.student, { cascade: true })
   studentGrades: StudentGrade[];
 
-  // reviews *written* for trainers
   @OneToMany(() => TrainerReview, (tr) => tr.student, { cascade: true })
   trainerReviews: TrainerReview[];
 }
