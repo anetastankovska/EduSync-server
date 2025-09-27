@@ -9,6 +9,7 @@ import {
   Index,
   OneToOne,
   ManyToMany,
+  JoinTable,
 } from 'typeorm';
 import { Academy } from 'src/academy/entities/academy.entity';
 import { StudentGrade } from 'src/student-grade/entities/student-grade.entity';
@@ -62,6 +63,7 @@ export class Student {
   @OneToMany(() => TrainerReview, (tr) => tr.student, { cascade: true })
   trainerReviews: TrainerReview[];
 
-  @ManyToMany(() => Subject, (s) => s.students, { cascade: false })
+  @ManyToMany(() => Subject, (s) => s.trainers, { cascade: false })
+  @JoinTable({ name: 'trainer_subject' })
   subjects: Subject[];
 }

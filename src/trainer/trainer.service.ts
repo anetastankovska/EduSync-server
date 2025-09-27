@@ -77,11 +77,20 @@ export class TrainerService {
     return this.trainerRepository.save(t);
   }
 
-  async setAcademy(id: number, academyId: number) {
-    const t = await this.trainerRepository.findOne({ where: { id } });
+  async setAcademy(id: number, academyId: number | null) {
+    const t = await this.trainerRepository.findOne({
+      where: { id },
+      relations: ['subjects'],
+    });
     if (!t) throw new NotFoundException('Trainer not found');
-    t.academyId = academyId ?? null;
-    return this.trainerRepository.save(t);
+
+    // If academy changes (including to null), clear subjects
+    const changed = (t.academyId ?? null) !== (academyId ?? null);
+    t.academyId = academyId;
+    if (changed) t.subjects = [];
+
+    const saved = await this.trainerRepository.save(t);
+    return saved; // FE will rehydrate subjectIds from this
   }
 
   async setSubjects(id: number, subjectIds: number[]) {
@@ -92,11 +101,23 @@ export class TrainerService {
     if (!t) throw new NotFoundException('Trainer not found');
     if (!t.academyId) throw new BadRequestException('Assign academy first');
 
+    // allow clearing
+    if (!subjectIds?.length) {
+      t.subjects = [];
+      return this.trainerRepository.save(t);
+    }
+
     const subs = await this.subjectRepository.findBy({ id: In(subjectIds) });
-    // ensure all subjects belong to trainer’s academy
+
+    // Ensure all requested ids exist
+    if (subs.length !== subjectIds.length) {
+      throw new BadRequestException('One or more subjects not found');
+    }
+    // Ensure all belong to trainer academy
     if (subs.some((s) => s.academyId !== t.academyId)) {
       throw new BadRequestException('Subject not in trainer academy');
     }
+
     t.subjects = subs;
     return this.trainerRepository.save(t);
   }

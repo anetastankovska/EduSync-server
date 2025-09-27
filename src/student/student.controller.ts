@@ -137,15 +137,13 @@ export class StudentController {
   }
 
   @Patch(':id/academy')
-  updateAcademy(
-    @Param('id', ParseIntPipe) id: number,
-    @Body('academyId', ParseIntPipe) academyId: number,
-  ) {
+  updateAcademy(@Param('id', ParseIntPipe) id: number, @Body() dto) {
+    const academyId = dto.academyId ?? null;
     return this.studentService.setAcademy(id, academyId);
   }
 
   @Put(':id/subjects')
   setSubjects(@Param('id', ParseIntPipe) id: number, @Body() dto) {
-    return this.studentService.setSubjects(id, dto.subjectIds);
+    return this.studentService.setSubjects(id, dto.subjectIds ?? []);
   }
 }

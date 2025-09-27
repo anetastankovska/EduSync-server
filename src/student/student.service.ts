@@ -77,11 +77,19 @@ export class StudentService {
     return this.studentRepository.save(student);
   }
 
-  async setAcademy(id: number, academyId: number) {
-    const t = await this.studentRepository.findOne({ where: { id } });
-    if (!t) throw new NotFoundException('Trainer not found');
-    t.academyId = academyId ?? null;
-    return this.studentRepository.save(t);
+  async setAcademy(id: number, academyId: number | null) {
+    const s = await this.studentRepository.findOne({
+      where: { id },
+      relations: ['subjects'],
+    });
+    if (!s) throw new NotFoundException('Student not found'); // FIX text
+
+    const changed = (s.academyId ?? null) !== (academyId ?? null);
+    s.academyId = academyId;
+    if (changed) s.subjects = [];
+
+    const saved = await this.studentRepository.save(s);
+    return saved;
   }
 
   async setSubjects(id: number, subjectIds: number[]) {
@@ -92,10 +100,20 @@ export class StudentService {
     if (!s) throw new NotFoundException('Student not found');
     if (!s.academyId) throw new BadRequestException('Assign academy first');
 
+    if (!subjectIds?.length) {
+      s.subjects = [];
+      return this.studentRepository.save(s);
+    }
+
     const subs = await this.subjectRepository.findBy({ id: In(subjectIds) });
+
+    if (subs.length !== subjectIds.length) {
+      throw new BadRequestException('One or more subjects not found');
+    }
     if (subs.some((x) => x.academyId !== s.academyId)) {
       throw new BadRequestException('Subject not in student academy');
     }
+
     s.subjects = subs;
     return this.studentRepository.save(s);
   }

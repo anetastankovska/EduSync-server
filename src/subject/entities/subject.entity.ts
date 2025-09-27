@@ -35,7 +35,6 @@ export class Subject {
   @Column()
   academyId: number;
 
-  // If you're assigning subjects to trainers/students from the admin panel:
   @ManyToMany(() => Trainer, (t) => t.subjects)
   trainers: Trainer[];
 

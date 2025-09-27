@@ -119,15 +119,14 @@ export class TrainerController {
   }
 
   @Patch(':id/academy')
-  updateAcademy(
-    @Param('id', ParseIntPipe) id: number,
-    @Body('academyId', ParseIntPipe) academyId: number,
-  ) {
+  updateAcademy(@Param('id', ParseIntPipe) id: number, @Body() dto) {
+    // dto.academyId may be undefined (meaning null) or a number
+    const academyId = dto.academyId ?? null;
     return this.trainerService.setAcademy(id, academyId);
   }
 
   @Put(':id/subjects')
   setSubjects(@Param('id', ParseIntPipe) id: number, @Body() dto) {
-    return this.trainerService.setSubjects(id, dto.subjectIds);
+    return this.trainerService.setSubjects(id, dto.subjectIds ?? []);
   }
 }
