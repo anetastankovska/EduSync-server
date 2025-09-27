@@ -51,7 +51,7 @@ export class SubjectService {
     if (!trainer)
       throw new NotFoundException(`Trainer ${dto.trainerId} not found`);
 
-    // 2) (recommended) trainer must belong to the same academy
+    // 2) trainer must belong to the same academy
     if (!trainer.academyId || trainer.academyId !== dto.academyId) {
       throw new BadRequestException(
         'Trainer must belong to the same academy as the subject',

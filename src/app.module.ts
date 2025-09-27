@@ -12,8 +12,6 @@ import { AuthModule } from './auth/auth.module';
 import { StudentGradeModule } from './student-grade/student-grade.module';
 import { TrainerReviewModule } from './trainer-review/trainer-review.module';
 
-// @nestjs/config is a configuration module for Nest based on the dotenv
-
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -36,12 +34,6 @@ import { TrainerReviewModule } from './trainer-review/trainer-review.module';
     {
       provide: APP_PIPE,
       useClass: ValidationPipe,
-      // Example options (customize as needed)
-      // useValue: {
-      //   whitelist: true, // Only allows properties decorated with @ApiModelProperty() to be used during validation
-      //   transform: true, // Automatically transforms incoming plain objects (POJOs) to instances of the respective DTO class
-      //   forbidNonWhitelisted: true, // Throws an error if incoming data contains properties that are not decorated with @ApiModelProperty()
-      // },
       useValue: new ValidationPipe({
         whitelist: true, // Only allows properties decorated with @ApiModelProperty() to be used during validation
         transform: true, // Automatically transforms incoming plain objects (POJOs) to instances of the respective DTO class

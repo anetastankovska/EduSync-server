@@ -1,4 +1,3 @@
-// src/student/dto/create-student.dto.ts
 import {
   IsEmail,
   IsInt,
@@ -24,7 +23,6 @@ export class CreateStudentDto {
   @IsInt()
   readonly academyId: number;
 
-  // ⬇️ flattened optional details
   @IsOptional()
   @IsString()
   @MaxLength(200)

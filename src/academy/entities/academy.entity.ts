@@ -23,7 +23,7 @@ export class Academy {
   @Column()
   price: number;
 
-  @OneToMany(() => Subject, (subject) => subject.academy, { cascade: true }) // when cascade is set to true, all the changes to the academy will propagate to subjects too
+  @OneToMany(() => Subject, (subject) => subject.academy, { cascade: true })
   subjects: Subject[];
 
   @OneToMany(() => Student, (student) => student.academy)

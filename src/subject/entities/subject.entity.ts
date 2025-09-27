@@ -7,7 +7,6 @@ import {
   ManyToOne,
   JoinColumn,
   ManyToMany,
-  Index,
 } from 'typeorm';
 import { Trainer } from 'src/trainer/entities/trainer.entity';
 import { Student } from 'src/student/entities/student.entity';
@@ -36,15 +35,14 @@ export class Subject {
   @Column()
   academyId: number;
 
-  // NEW – one trainer teaches a subject; allow NULL during transition
   @ManyToOne(() => Trainer, (t) => t.subjects, {
     onDelete: 'SET NULL',
-    nullable: true, // <— important
+    nullable: true,
   })
   @JoinColumn({ name: 'trainerId' })
   trainer: Trainer | null;
 
-  @Column({ nullable: true }) // <— important
+  @Column({ nullable: true })
   trainerId: number | null;
 
   @ManyToMany(() => Student, (s) => s.subjects)

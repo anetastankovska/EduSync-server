@@ -1,4 +1,3 @@
-// src/student/student.service.ts
 import {
   BadRequestException,
   Injectable,
@@ -46,7 +45,7 @@ export class StudentService {
   }
 
   async create(dto: CreateStudentDto): Promise<Student> {
-    const student = this.studentRepository.create(dto); // dto now contains address/telephone/dateOfBirth
+    const student = this.studentRepository.create(dto);
     return this.studentRepository.save(student);
   }
 

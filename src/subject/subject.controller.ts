@@ -45,7 +45,6 @@ export class SubjectController {
     name: 'academyId',
     required: false,
   })
-  // in SubjectController
   @Get()
   findAll(
     @Query('difficulty') difficulty?: string,

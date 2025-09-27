@@ -1,6 +1,5 @@
-// src/student-grade/entities/student-grade.entity.ts
 import { Student } from 'src/student/entities/student.entity';
-import { Trainer } from 'src/trainer/entities/trainer.entity'; // if you’re also grading per‐trainer
+import { Trainer } from 'src/trainer/entities/trainer.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -33,7 +32,6 @@ export class StudentGrade {
   @Column()
   studentId: number;
 
-  // ← and if you’re tracking which trainer gave it:
   @ManyToOne(() => Trainer, (trainer) => trainer.studentGrades, {
     onDelete: 'SET NULL',
     nullable: true,

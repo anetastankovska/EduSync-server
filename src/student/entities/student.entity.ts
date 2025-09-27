@@ -61,8 +61,7 @@ export class Student {
   @OneToMany(() => TrainerReview, (tr) => tr.student, { cascade: true })
   trainerReviews: TrainerReview[];
 
-  // ✅ Correct ManyToMany: Subject.inverse side is "students"
   @ManyToMany(() => Subject, (s) => s.students, { cascade: false })
-  @JoinTable({ name: 'student_subject' }) // ✅ correct join table name
+  @JoinTable({ name: 'student_subject' })
   subjects: Subject[];
 }

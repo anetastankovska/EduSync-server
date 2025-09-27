@@ -1,4 +1,3 @@
-// src/trainer/trainer.controller.ts
 import {
   Controller,
   Get,
@@ -36,7 +35,6 @@ import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
 export class TrainerController {
   constructor(private readonly trainerService: TrainerService) {}
 
-  // ---------- STATIC 'me' ROUTES FIRST ----------
   @UseGuards(JwtAuthGuard)
   @Get('me')
   @ApiOperation({ summary: 'Get my trainer profile (by JWT user id)' })
@@ -53,7 +51,6 @@ export class TrainerController {
     return this.trainerService.updateByUserId(req.user.sub, dto);
   }
 
-  // ---------- COLLECTION & CREATE ----------
   @ApiOperation({
     summary:
       'Retrieves all trainers. Optionally filter by name, academyId, and seniority',
@@ -82,7 +79,6 @@ export class TrainerController {
     return this.trainerService.create(dto);
   }
 
-  // ---------- ID ROUTES LAST ----------
   @ApiOperation({ summary: 'Retrieves a trainer by id' })
   @ApiOkResponse({ type: Trainer, description: 'Trainer retrieved' })
   @Get(':id')

@@ -7,12 +7,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-
 import { User } from 'src/user/entities/user.entity';
 import { Student } from 'src/student/entities/student.entity';
 import { Trainer } from 'src/trainer/entities/trainer.entity';
 import { Role } from 'src/util/role.enum';
-
 import { RegisterUserDto } from './dto/register-user.dto';
 import { LoginUsersDto } from './dto/login-user.dto';
 import { UserService } from 'src/user/user.service';
@@ -46,7 +44,6 @@ export class AuthService {
   }
 
   async register({ email, password, role }: RegisterUserDto) {
-    // allow FE to send 'student' | 'trainer' | 'admin' (lowercase)
     const normalized = (role ?? 'student').toString().toLowerCase() as
       | 'student'
       | 'trainer'
@@ -90,12 +87,11 @@ export class AuthService {
           name: '',
           email: user.email,
           age: 18,
-          seniority: null, // if null not allowed, set a default
-          academyId: null, // or null / default
+          seniority: null,
+          academyId: null,
         });
         await trx.save(Trainer, trainer);
       }
-      // Role.Admin → nothing else to create
 
       const { password, ...safe } = user;
       return safe;

@@ -18,10 +18,6 @@ export class AcademyService {
     });
   }
 
-  // async findOne(id: number): Promise<Academy> {
-  //   return this.academyRepository.findOneBy({id});
-  // }
-
   async findOne(id: number): Promise<Academy> {
     try {
       return await this.academyRepository.findOneOrFail({
@@ -59,13 +55,6 @@ export class AcademyService {
       throw new NotFoundException(`Academy with ID ${id} not found`);
     }
   }
-
-  // async findByName(name: string): Promise<Academy[]> {
-  //   return this.academyRepository
-  //     .createQueryBuilder('academy')
-  //     .where('LOWER(academy.name) = LOWER(:name)', { name }) // we should firs normalize the string
-  //     .getMany();
-  // }
 
   async findByName(name: string): Promise<Academy[]> {
     return this.academyRepository
