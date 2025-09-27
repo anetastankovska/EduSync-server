@@ -12,8 +12,6 @@ import {
   JoinColumn,
   OneToOne,
   Index,
-  ManyToMany,
-  JoinTable,
 } from 'typeorm';
 import { Subject } from 'src/subject/entities/subject.entity';
 
@@ -22,7 +20,6 @@ export class Trainer {
   @PrimaryGeneratedColumn()
   id: number;
 
-  // NEW: link to the owning user (1:1)
   @OneToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'userId' })
   user: User;
@@ -48,7 +45,7 @@ export class Trainer {
     nullable: true,
   })
   @JoinColumn({ name: 'academyId' })
-  academy: Academy;
+  academy: Academy | null;
 
   @Column({ nullable: true })
   academyId: number | null;
@@ -59,7 +56,7 @@ export class Trainer {
   @OneToMany(() => StudentGrade, (sg) => sg.trainer, { cascade: true })
   studentGrades: StudentGrade[];
 
-  @ManyToMany(() => Subject, (s) => s.students, { cascade: false })
-  @JoinTable({ name: 'student_subject' })
+  // One trainer teaches many subjects
+  @OneToMany(() => Subject, (s) => s.trainer)
   subjects: Subject[];
 }

@@ -45,14 +45,21 @@ export class SubjectController {
     name: 'academyId',
     required: false,
   })
+  // in SubjectController
+  @Get()
   findAll(
-    @Query('difficulty') difficulty: string,
-    @Query('academyId') academyId: number,
-  ): Promise<Subject[]> {
-    return this.subjectService.findAll(difficulty, academyId);
+    @Query('difficulty') difficulty?: string,
+    @Query('academyId') academyId?: number,
+    @Query('trainerId') trainerId?: number,
+  ) {
+    return this.subjectService.findAll(
+      difficulty,
+      academyId ? Number(academyId) : undefined,
+      trainerId ? Number(trainerId) : undefined,
+    );
   }
 
-  @ApiOperation({ summary: 'Retrieves a student by id' })
+  @ApiOperation({ summary: 'Retrieves a subject by id' })
   @ApiOkResponse({
     type: Subject,
     description: 'Subject retrieved successfully',
@@ -72,7 +79,7 @@ export class SubjectController {
     return this.subjectService.create(createSubjectDto);
   }
 
-  @ApiOperation({ summary: 'Updates a student by id' })
+  @ApiOperation({ summary: 'Updates a subject by id' })
   @ApiOkResponse({
     type: Subject,
     description: 'Updated a subject successfully',
@@ -85,7 +92,7 @@ export class SubjectController {
     return this.subjectService.update(+id, updateSubjectDto);
   }
 
-  @ApiOperation({ summary: 'Deletes a student by id' })
+  @ApiOperation({ summary: 'Deletes a subject by id' })
   @ApiOkResponse({
     description: 'Deleted a subject successfully',
   })

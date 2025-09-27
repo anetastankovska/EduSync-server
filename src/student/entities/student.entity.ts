@@ -21,7 +21,6 @@ export class Student {
   @PrimaryGeneratedColumn()
   id: number;
 
-  // NEW: link to the owning user (1:1)
   @OneToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'userId' })
   user: User;
@@ -47,7 +46,6 @@ export class Student {
   @Column({ nullable: true })
   academyId: number | null;
 
-  // flattened details (optional is OK)
   @Column({ length: 200, nullable: true })
   address: string | null;
 
@@ -63,7 +61,8 @@ export class Student {
   @OneToMany(() => TrainerReview, (tr) => tr.student, { cascade: true })
   trainerReviews: TrainerReview[];
 
-  @ManyToMany(() => Subject, (s) => s.trainers, { cascade: false })
-  @JoinTable({ name: 'trainer_subject' })
+  // ✅ Correct ManyToMany: Subject.inverse side is "students"
+  @ManyToMany(() => Subject, (s) => s.students, { cascade: false })
+  @JoinTable({ name: 'student_subject' }) // ✅ correct join table name
   subjects: Subject[];
 }

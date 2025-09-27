@@ -1,7 +1,6 @@
 import { IsEnum, IsInt, IsNotEmpty, IsString, Min } from 'class-validator';
 import { Difficulty } from 'src/util/difficulty.enum';
 
-// Global swagger configured in nest-cli.json
 export class CreateSubjectDto {
   @IsString()
   @IsNotEmpty()
@@ -19,4 +18,8 @@ export class CreateSubjectDto {
   @IsInt()
   @IsNotEmpty()
   readonly academyId: number;
+
+  @IsInt()
+  @IsNotEmpty()
+  readonly trainerId: number; // NEW
 }
