@@ -52,11 +52,11 @@ export class SubjectService {
       throw new NotFoundException(`Trainer ${dto.trainerId} not found`);
 
     // 2) trainer must belong to the same academy
-    if (!trainer.academyId || trainer.academyId !== dto.academyId) {
-      throw new BadRequestException(
-        'Trainer must belong to the same academy as the subject',
-      );
-    }
+    // if (!trainer.academyId || trainer.academyId !== dto.academyId) {
+    //   throw new BadRequestException(
+    //     'Trainer must belong to the same academy as the subject',
+    //   );
+    // }
 
     const subject = this.subjectRepository.create({
       name: dto.name,
