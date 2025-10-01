@@ -11,6 +11,7 @@ import { TrainerModule } from './trainer/trainer.module';
 import { AuthModule } from './auth/auth.module';
 import { StudentGradeModule } from './student-grade/student-grade.module';
 import { TrainerReviewModule } from './trainer-review/trainer-review.module';
+import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { TrainerReviewModule } from './trainer-review/trainer-review.module';
     AuthModule,
     StudentGradeModule,
     TrainerReviewModule,
+    HealthModule,
   ],
   controllers: [AppController],
   providers: [
