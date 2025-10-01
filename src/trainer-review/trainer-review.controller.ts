@@ -33,17 +33,17 @@ export class TrainerReviewController {
   constructor(private readonly service: TrainerReviewService) {}
 
   // Students leave a review for a trainer
-  @ApiOperation({ summary: 'Student leaves a review for a trainer' })
-  @ApiCreatedResponse({ type: TrainerReview, description: 'Review created' })
+  @ApiOperation({
+    summary: 'Student leaves a review for a trainer (subject-scoped)',
+  })
   @Post(':trainerId')
   create(
     @Param('trainerId', ParseIntPipe) trainerId: number,
-    @Body() dto: CreateTrainerReviewDto,
+    @Body() dto: CreateTrainerReviewDto, // now includes subjectId
     @Req() req: any,
   ) {
     return this.service.createForTrainer(trainerId, req.user.sub, dto);
   }
-
   // List reviews for a trainer
   @ApiOperation({ summary: 'List reviews for a trainer' })
   @ApiOkResponse({ type: [TrainerReview] })

@@ -1,5 +1,6 @@
 import { Student } from 'src/student/entities/student.entity';
 import { Trainer } from 'src/trainer/entities/trainer.entity';
+import { Subject } from 'src/subject/entities/subject.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -9,9 +10,11 @@ import {
   Index,
   CreateDateColumn,
   UpdateDateColumn,
+  Unique, // 👈 add this
 } from 'typeorm';
 
 @Entity({ name: 'trainer_review' })
+@Unique(['studentId', 'trainerId', 'subjectId']) // 👈 enforce one review per trio
 export class TrainerReview {
   @PrimaryGeneratedColumn()
   id: number;
@@ -30,6 +33,15 @@ export class TrainerReview {
   @Index()
   @Column()
   trainerId: number;
+
+  // subject context of the review
+  @ManyToOne(() => Subject, { onDelete: 'CASCADE', nullable: false })
+  @JoinColumn({ name: 'subjectId' })
+  subject: Subject;
+
+  @Index()
+  @Column()
+  subjectId: number;
 
   // who wrote the review
   @ManyToOne(() => Student, (s) => s.trainerReviews, { onDelete: 'CASCADE' })

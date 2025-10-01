@@ -39,7 +39,6 @@ export class StudentGradeController {
     @Body() dto: CreateStudentGradeDto,
     @Req() req: any,
   ) {
-    // trainer id comes from JWT payload
     return this.service.createForStudent(studentId, req.user.sub, dto);
   }
 }

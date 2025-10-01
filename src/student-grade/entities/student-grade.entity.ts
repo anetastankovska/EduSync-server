@@ -1,5 +1,6 @@
 import { Student } from 'src/student/entities/student.entity';
 import { Trainer } from 'src/trainer/entities/trainer.entity';
+import { Subject } from 'src/subject/entities/subject.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -9,9 +10,11 @@ import {
   Index,
   CreateDateColumn,
   UpdateDateColumn,
+  Unique,
 } from 'typeorm';
 
 @Entity({ name: 'student_grade' })
+@Unique(['studentId', 'trainerId', 'subjectId'])
 export class StudentGrade {
   @PrimaryGeneratedColumn()
   id: number;
@@ -42,6 +45,15 @@ export class StudentGrade {
   @Index()
   @Column({ nullable: true })
   trainerId?: number | null;
+
+  // NEW: grade is for a specific subject
+  @ManyToOne(() => Subject, { onDelete: 'CASCADE', nullable: false })
+  @JoinColumn({ name: 'subjectId' })
+  subject: Subject;
+
+  @Index()
+  @Column()
+  subjectId: number;
 
   @CreateDateColumn()
   createdAt: Date;

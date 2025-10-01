@@ -22,19 +22,40 @@ export class StudentService {
     academyId?: number,
     page?: number,
     sort?: string,
+    subjectId?: number, // <-- NEW
   ) {
     const take = 5;
-    const where: any = {};
-    if (name) where.name = name;
-    if (academyId) where.academyId = academyId;
-
-    const order: any = {};
-    if (sort) order.name = sort.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
-
     const pageNum = page && page > 0 ? page : 1; // 1-based
     const skip = (pageNum - 1) * take;
 
-    return this.studentRepository.find({ where, take, skip, order });
+    // If no subject filter, keep your existing simple find()
+    if (!subjectId) {
+      const where: any = {};
+      if (name) where.name = name;
+      if (academyId) where.academyId = academyId;
+
+      const order: any = {};
+      if (sort) order.name = sort.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
+
+      return this.studentRepository.find({ where, take, skip, order });
+    }
+
+    // With subject filter -> use a join on the M:N relation "student_subject"
+    const qb = this.studentRepository
+      .createQueryBuilder('s')
+      .leftJoin('s.subjects', 'sub')
+      .where('sub.id = :subjectId', { subjectId });
+
+    if (name) qb.andWhere('s.name = :name', { name });
+    if (academyId) qb.andWhere('s.academyId = :academyId', { academyId });
+
+    if (sort) {
+      qb.orderBy('s.name', sort.toUpperCase() === 'ASC' ? 'ASC' : 'DESC');
+    }
+
+    qb.take(take).skip(skip);
+
+    return qb.getMany();
   }
 
   async findOne(id: number) {

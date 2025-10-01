@@ -5,11 +5,12 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import { TrainerReview } from './entities/trainer-review.entity';
 import { CreateTrainerReviewDto } from './dto/create-trainer-review.dto';
 import { Trainer } from 'src/trainer/entities/trainer.entity';
 import { Student } from 'src/student/entities/student.entity';
+import { Subject } from 'src/subject/entities/subject.entity';
 
 @Injectable()
 export class TrainerReviewService {
@@ -20,6 +21,8 @@ export class TrainerReviewService {
     private readonly trainerRepo: Repository<Trainer>,
     @InjectRepository(Student)
     private readonly studentRepo: Repository<Student>,
+    @InjectRepository(Subject)
+    private readonly subjectRepo: Repository<Subject>,
   ) {}
 
   async createForTrainer(
@@ -27,48 +30,76 @@ export class TrainerReviewService {
     studentUserId: number, // from JWT payload
     dto: CreateTrainerReviewDto,
   ) {
-    // 1) resolve student from userId (JWT)
+    const { subjectId } = dto;
+
+    // 1) Resolve student by userId (JWT)
     const student = await this.studentRepo.findOne({
       where: { userId: studentUserId },
+      relations: { subjects: true }, // needed for enrollment check
     });
     if (!student) throw new NotFoundException('Student profile not found');
 
-    // 2) load trainer by trainerId param
+    // 2) Trainer must exist
     const trainer = await this.trainerRepo.findOne({
       where: { id: trainerId },
     });
     if (!trainer) throw new NotFoundException(`Trainer ${trainerId} not found`);
 
-    // 3) same-academy check
+    // 3) Subject must exist
+    const subject = await this.subjectRepo.findOne({
+      where: { id: subjectId },
+    });
+    if (!subject) throw new NotFoundException(`Subject ${subjectId} not found`);
+
+    // 4) Academy context (optional but sensible): trainer & subject should belong to same academy as student (if set)
     if (
-      !trainer.academyId ||
-      !student.academyId ||
-      trainer.academyId !== student.academyId
+      (trainer.academyId &&
+        student.academyId &&
+        trainer.academyId !== student.academyId) ||
+      (subject.academyId &&
+        student.academyId &&
+        subject.academyId !== student.academyId)
     ) {
+      throw new ForbiddenException('You can only review within your academy.');
+    }
+
+    // 5) Enrollment: student must be enrolled in the subject
+    const studentEnrolled = student.subjects?.some((s) => s.id === subjectId);
+    if (!studentEnrolled) {
       throw new ForbiddenException(
-        'You can only review trainers from your academy.',
+        'You can only review subjects you are enrolled in.',
       );
     }
 
-    // 4) prevent duplicate review per (student, trainer)
-    const existing = await this.reviewRepo.findOne({
-      where: { trainerId, studentId: student.id },
-    });
-    if (existing)
-      throw new ConflictException('You have already reviewed this trainer');
+    // 6) Assignment: trainer must be assigned to the subject
+    if (subject.trainerId !== trainer.id) {
+      throw new ForbiddenException(
+        'Selected trainer is not assigned to this subject.',
+      );
+    }
 
-    // 5) persist review using student PK
+    // 7) Uniqueness: only one review per (student, trainer, subject)
+    const existing = await this.reviewRepo.findOne({
+      where: { trainerId, studentId: student.id, subjectId },
+    });
+    if (existing) {
+      throw new ConflictException(
+        'You have already reviewed this trainer for this subject.',
+      );
+    }
+
+    // 8) Persist
     const entity = this.reviewRepo.create({
       trainerId: trainer.id,
       studentId: student.id,
-      grade: dto.grade ?? null,
-      description: dto.description ?? null,
+      subjectId,
+      grade: dto.grade,
+      description: dto.description,
     });
 
     return this.reviewRepo.save(entity);
   }
 
-  // Additional helper methods
   listForTrainer(trainerId: number) {
     return this.reviewRepo.find({ where: { trainerId } });
   }

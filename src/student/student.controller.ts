@@ -70,23 +70,21 @@ export class StudentController {
     type: Number,
     description: '1-based page index',
   })
-  @ApiQuery({
-    name: 'sort',
-    required: false,
-    type: String,
-    description: 'ASC or DESC (by name)',
-  })
+  @ApiQuery({ name: 'subjectId', required: false, type: Number }) // <-- NEW
+  @Get()
   async findAll(
     @Query('name') name?: string,
-    @Query('academyId') academyId?: string, // optional, no ParseIntPipe
-    @Query('page') page?: string, // optional
-    @Query('sort') sort?: string, // optional
+    @Query('academyId') academyId?: string,
+    @Query('page') page?: string,
+    @Query('sort') sort?: string,
+    @Query('subjectId') subjectId?: string, // <-- NEW
   ): Promise<Student[]> {
     return this.studentService.findAll(
       name,
       academyId ? Number(academyId) : undefined,
       page ? Number(page) : undefined,
       sort,
+      subjectId ? Number(subjectId) : undefined, // <-- NEW
     );
   }
 
