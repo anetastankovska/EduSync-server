@@ -22,13 +22,13 @@ export class StudentService {
     academyId?: number,
     page?: number,
     sort?: string,
-    subjectId?: number, // <-- NEW
+    subjectId?: number,
   ) {
     const take = 5;
     const pageNum = page && page > 0 ? page : 1; // 1-based
     const skip = (pageNum - 1) * take;
 
-    // If no subject filter, keep your existing simple find()
+    // No subject filter → simple find with relations
     if (!subjectId) {
       const where: any = {};
       if (name) where.name = name;
@@ -37,14 +37,21 @@ export class StudentService {
       const order: any = {};
       if (sort) order.name = sort.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
 
-      return this.studentRepository.find({ where, take, skip, order });
+      return this.studentRepository.find({
+        where,
+        take,
+        skip,
+        order,
+        relations: { subjects: true }, // <-- include subjects for preselection
+      });
     }
 
-    // With subject filter -> use a join on the M:N relation "student_subject"
+    // With subject filter → join M:N and also select subjects
     const qb = this.studentRepository
       .createQueryBuilder('s')
-      .leftJoin('s.subjects', 'sub')
-      .where('sub.id = :subjectId', { subjectId });
+      .leftJoinAndSelect('s.subjects', 'sub') // <-- include subjects
+      .where('sub.id = :subjectId', { subjectId })
+      .distinct(true); // avoid duplicates when a student matches multiple rows
 
     if (name) qb.andWhere('s.name = :name', { name });
     if (academyId) qb.andWhere('s.academyId = :academyId', { academyId });
@@ -59,7 +66,10 @@ export class StudentService {
   }
 
   async findOne(id: number) {
-    const student = await this.studentRepository.findOne({ where: { id } });
+    const student = await this.studentRepository.findOne({
+      where: { id },
+      relations: { subjects: true }, // <-- add this
+    });
     if (!student)
       throw new NotFoundException(`Student with ID ${id} not found`);
     return student;
@@ -71,11 +81,40 @@ export class StudentService {
   }
 
   async update(id: number, dto: UpdateStudentDto): Promise<Student> {
-    const student = await this.studentRepository.findOneBy({ id });
-    if (!student)
+    // 1) update academyId only if provided
+    if (dto.academyId !== undefined) {
+      await this.studentRepository.update(id, {
+        academyId: dto.academyId ?? null,
+      });
+    }
+
+    // 2) sync subjects only if provided
+    if (dto.subjectIds !== undefined) {
+      const rel = this.studentRepository
+        .createQueryBuilder()
+        .relation(Student, 'subjects')
+        .of(id);
+
+      // load current subject ids
+      const current = await rel.loadMany<{ id: number }>();
+      const have = new Set(current.map((s) => s.id));
+      const want = new Set(dto.subjectIds);
+
+      const toAdd = dto.subjectIds.filter((x) => !have.has(x));
+      const toRemove = [...have].filter((x) => !want.has(x));
+
+      if (toAdd.length) await rel.add(toAdd);
+      if (toRemove.length) await rel.remove(toRemove);
+    }
+
+    // return fresh state
+    const updated = await this.studentRepository.findOne({
+      where: { id },
+      relations: { academy: true, subjects: true },
+    });
+    if (!updated)
       throw new NotFoundException(`Student with ID ${id} not found`);
-    this.studentRepository.merge(student, dto);
-    return this.studentRepository.save(student);
+    return updated;
   }
 
   async remove(id: number) {

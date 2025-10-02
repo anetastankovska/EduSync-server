@@ -1,3 +1,4 @@
+// create-student.dto.ts
 import {
   IsEmail,
   IsInt,
@@ -7,6 +8,9 @@ import {
   MaxLength,
   Min,
   IsDateString,
+  IsArray,
+  ArrayUnique,
+  IsInt as IsIntEach,
 } from 'class-validator';
 
 export class CreateStudentDto {
@@ -21,7 +25,7 @@ export class CreateStudentDto {
 
   @IsOptional()
   @IsInt()
-  readonly academyId: number;
+  readonly academyId?: number;
 
   @IsOptional()
   @IsString()
@@ -36,4 +40,11 @@ export class CreateStudentDto {
   @IsOptional()
   @IsDateString()
   readonly dateOfBirth?: string; // 'YYYY-MM-DD'
+
+  // optional at creation time
+  @IsOptional()
+  @IsArray()
+  @ArrayUnique()
+  @IsIntEach({ each: true })
+  readonly subjectIds?: number[];
 }
