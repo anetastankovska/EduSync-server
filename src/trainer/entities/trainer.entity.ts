@@ -4,14 +4,14 @@ import { StudentGrade } from 'src/student-grade/entities/student-grade.entity';
 import { Academy } from 'src/academy/entities/academy.entity';
 import { Seniority } from 'src/util/seniority.enum';
 import {
-  Entity,
-  PrimaryGeneratedColumn,
   Column,
+  Entity,
+  Index,
+  JoinColumn,
   ManyToOne,
   OneToMany,
-  JoinColumn,
   OneToOne,
-  Index,
+  PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Subject } from 'src/subject/entities/subject.entity';
 
@@ -40,8 +40,9 @@ export class Trainer {
   @Column({ type: 'enum', enum: Seniority, nullable: true, default: null })
   seniority: Seniority | null;
 
+  // Keep trainers when academy is deleted; just unassign them
   @ManyToOne(() => Academy, (a) => a.trainers, {
-    onDelete: 'CASCADE',
+    onDelete: 'SET NULL',
     nullable: true,
   })
   @JoinColumn({ name: 'academyId' })

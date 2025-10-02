@@ -1,12 +1,12 @@
 import { Academy } from 'src/academy/entities/academy.entity';
 import { Difficulty } from 'src/util/difficulty.enum';
 import {
-  Entity,
-  PrimaryGeneratedColumn,
   Column,
-  ManyToOne,
+  Entity,
   JoinColumn,
   ManyToMany,
+  ManyToOne,
+  PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Trainer } from 'src/trainer/entities/trainer.entity';
 import { Student } from 'src/student/entities/student.entity';
@@ -25,7 +25,8 @@ export class Subject {
   @Column({ type: 'enum', enum: Difficulty })
   difficulty: Difficulty;
 
-  @ManyToOne(() => Academy, (academy) => academy.subjects, {
+  // Delete subjects when their academy is deleted
+  @ManyToOne(() => Academy, (a) => a.subjects, {
     onDelete: 'CASCADE',
     nullable: false,
   })
@@ -35,6 +36,7 @@ export class Subject {
   @Column()
   academyId: number;
 
+  // Keep subject if trainer is deleted; just clear the assignment
   @ManyToOne(() => Trainer, (t) => t.subjects, {
     onDelete: 'SET NULL',
     nullable: true,

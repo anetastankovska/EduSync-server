@@ -1,15 +1,15 @@
 import { User } from 'src/user/entities/user.entity';
 import {
-  Entity,
-  PrimaryGeneratedColumn,
   Column,
+  Entity,
+  Index,
+  JoinColumn,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
   OneToMany,
-  JoinColumn,
-  Index,
   OneToOne,
-  ManyToMany,
-  JoinTable,
+  PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Academy } from 'src/academy/entities/academy.entity';
 import { StudentGrade } from 'src/student-grade/entities/student-grade.entity';
@@ -36,6 +36,7 @@ export class Student {
   @Column({ length: 255 })
   email: string;
 
+  // Keep students when academy is deleted; just unassign them
   @ManyToOne(() => Academy, (a) => a.students, {
     onDelete: 'SET NULL',
     nullable: true,
@@ -61,7 +62,18 @@ export class Student {
   @OneToMany(() => TrainerReview, (tr) => tr.student, { cascade: true })
   trainerReviews: TrainerReview[];
 
+  // Join table auto-cleans when either side is deleted
   @ManyToMany(() => Subject, (s) => s.students, { cascade: false })
-  @JoinTable({ name: 'student_subject' })
+  @JoinTable({
+    name: 'student_subject',
+    joinColumn: {
+      name: 'studentId',
+      referencedColumnName: 'id',
+    },
+    inverseJoinColumn: {
+      name: 'subjectId',
+      referencedColumnName: 'id',
+    },
+  })
   subjects: Subject[];
 }

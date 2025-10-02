@@ -1,7 +1,7 @@
-import { Student } from 'src/student/entities/student.entity';
-import { Subject } from 'src/subject/entities/subject.entity';
-import { Trainer } from 'src/trainer/entities/trainer.entity';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Subject } from 'src/subject/entities/subject.entity';
+import { Student } from 'src/student/entities/student.entity';
+import { Trainer } from 'src/trainer/entities/trainer.entity';
 
 @Entity()
 export class Academy {
@@ -23,12 +23,12 @@ export class Academy {
   @Column()
   price: number;
 
-  @OneToMany(() => Subject, (subject) => subject.academy, { cascade: true })
+  @OneToMany(() => Subject, (s) => s.academy)
   subjects: Subject[];
 
-  @OneToMany(() => Student, (student) => student.academy)
+  @OneToMany(() => Student, (s) => s.academy)
   students: Student[];
 
-  @OneToMany(() => Trainer, (trainer) => trainer.academy)
+  @OneToMany(() => Trainer, (t) => t.academy)
   trainers: Trainer[];
 }
