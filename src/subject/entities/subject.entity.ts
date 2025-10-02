@@ -16,16 +16,11 @@ export class Subject {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ length: 120 })
-  name: string;
+  @Column({ length: 120 }) name: string;
+  @Column({ type: 'smallint', unsigned: true }) numberOfClasses: number;
+  @Column({ type: 'enum', enum: Difficulty }) difficulty: Difficulty;
 
-  @Column({ type: 'smallint', unsigned: true })
-  numberOfClasses: number;
-
-  @Column({ type: 'enum', enum: Difficulty })
-  difficulty: Difficulty;
-
-  // Delete subjects when their academy is deleted
+  // delete subjects when their academy is deleted
   @ManyToOne(() => Academy, (a) => a.subjects, {
     onDelete: 'CASCADE',
     nullable: false,
@@ -33,10 +28,9 @@ export class Subject {
   @JoinColumn({ name: 'academyId' })
   academy: Academy;
 
-  @Column()
-  academyId: number;
+  @Column() academyId: number;
 
-  // Keep subject if trainer is deleted; just clear the assignment
+  // if trainer is deleted, keep subject and nullify trainerId
   @ManyToOne(() => Trainer, (t) => t.subjects, {
     onDelete: 'SET NULL',
     nullable: true,
@@ -44,9 +38,9 @@ export class Subject {
   @JoinColumn({ name: 'trainerId' })
   trainer: Trainer | null;
 
-  @Column({ nullable: true })
-  trainerId: number | null;
+  @Column({ nullable: true }) trainerId: number | null;
 
+  // many-to-many with students (join table will be created with ON DELETE CASCADE FKs)
   @ManyToMany(() => Student, (s) => s.subjects)
   students: Student[];
 }

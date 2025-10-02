@@ -24,23 +24,16 @@ export class Trainer {
   @JoinColumn({ name: 'userId' })
   user: User;
 
-  @Index({ unique: true })
-  @Column()
-  userId: number;
+  @Index({ unique: true }) @Column() userId: number;
 
-  @Column()
-  name: string;
-
-  @Column({ length: 255, unique: true })
-  email: string;
-
-  @Column()
-  age: number;
+  @Column() name: string;
+  @Column({ length: 255, unique: true }) email: string;
+  @Column() age: number;
 
   @Column({ type: 'enum', enum: Seniority, nullable: true, default: null })
   seniority: Seniority | null;
 
-  // Keep trainers when academy is deleted; just unassign them
+  // keep trainers when academy is deleted; just unassign
   @ManyToOne(() => Academy, (a) => a.trainers, {
     onDelete: 'SET NULL',
     nullable: true,
@@ -48,8 +41,7 @@ export class Trainer {
   @JoinColumn({ name: 'academyId' })
   academy: Academy | null;
 
-  @Column({ nullable: true })
-  academyId: number | null;
+  @Column({ nullable: true }) academyId: number | null;
 
   @OneToMany(() => TrainerReview, (tr) => tr.trainer, { cascade: true })
   trainerReviews: TrainerReview[];
@@ -57,7 +49,6 @@ export class Trainer {
   @OneToMany(() => StudentGrade, (sg) => sg.trainer, { cascade: true })
   studentGrades: StudentGrade[];
 
-  // One trainer teaches many subjects
   @OneToMany(() => Subject, (s) => s.trainer)
   subjects: Subject[];
 }

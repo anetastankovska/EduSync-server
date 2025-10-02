@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { Subject } from './entities/subject.entity';
 import { CreateSubjectDto } from './dto/create-subject.dto';
 import { UpdateSubjectDto } from './dto/update-subject.dto';
@@ -16,7 +16,8 @@ export class SubjectService {
     @InjectRepository(Subject)
     private subjectRepository: Repository<Subject>,
     @InjectRepository(Trainer)
-    private trainerRepository: Repository<Trainer>, // NEW
+    private trainerRepository: Repository<Trainer>,
+    private readonly dataSource: DataSource,
   ) {}
 
   async findAll(
@@ -93,10 +94,21 @@ export class SubjectService {
     return this.subjectRepository.save(merged);
   }
 
-  async remove(id: number) {
-    const result = await this.subjectRepository.delete(id);
-    if (result.affected === 0) {
-      throw new NotFoundException('No subject found with the provided id.');
-    }
+  async remove(id: number): Promise<void> {
+    await this.dataSource.transaction(async (manager) => {
+      // 1) delete join rows first so the FK doesn't block
+      await manager
+        .createQueryBuilder()
+        .delete()
+        .from('student_subject') // join table name from @JoinTable({ name: 'student_subject' })
+        .where('subjectId = :id', { id }) // column names from your JoinTable config
+        .execute();
+
+      // 2) delete the subject
+      const result = await manager.delete(Subject, { id });
+      if (!result.affected) {
+        throw new NotFoundException('No subject found with the provided id.');
+      }
+    });
   }
 }

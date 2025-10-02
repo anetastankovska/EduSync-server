@@ -77,7 +77,7 @@ export class StudentController {
     @Query('academyId') academyId?: string,
     @Query('page') page?: string,
     @Query('sort') sort?: string,
-    @Query('subjectId') subjectId?: string, // <-- NEW
+    @Query('subjectId') subjectId?: string,
   ): Promise<Student[]> {
     return this.studentService.findAll(
       name,

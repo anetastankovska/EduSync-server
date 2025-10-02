@@ -8,20 +8,13 @@ export class Academy {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
-  name: string;
+  @Column() name: string;
+  @Column() description: string;
 
-  @Column()
-  description: string;
+  @Column({ type: 'date' }) startDate: string;
+  @Column({ type: 'date' }) endDate: string;
 
-  @Column({ type: 'date' })
-  startDate: string;
-
-  @Column({ type: 'date' })
-  endDate: string;
-
-  @Column()
-  price: number;
+  @Column() price: number;
 
   @OneToMany(() => Subject, (s) => s.academy)
   subjects: Subject[];

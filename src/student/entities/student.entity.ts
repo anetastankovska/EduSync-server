@@ -25,18 +25,12 @@ export class Student {
   @JoinColumn({ name: 'userId' })
   user: User;
 
-  @Index({ unique: true })
-  @Column()
-  userId: number;
+  @Index({ unique: true }) @Column() userId: number;
 
-  @Column({ length: 100 })
-  name: string;
+  @Column({ length: 100 }) name: string;
+  @Index({ unique: true }) @Column({ length: 255 }) email: string;
 
-  @Index({ unique: true })
-  @Column({ length: 255 })
-  email: string;
-
-  // Keep students when academy is deleted; just unassign them
+  // keep students when academy is deleted; just unassign
   @ManyToOne(() => Academy, (a) => a.students, {
     onDelete: 'SET NULL',
     nullable: true,
@@ -44,17 +38,11 @@ export class Student {
   @JoinColumn({ name: 'academyId' })
   academy: Academy | null;
 
-  @Column({ nullable: true })
-  academyId: number | null;
+  @Column({ nullable: true }) academyId: number | null;
 
-  @Column({ length: 200, nullable: true })
-  address: string | null;
-
-  @Column({ length: 30, nullable: true })
-  telephone: string | null;
-
-  @Column({ type: 'date', nullable: true })
-  dateOfBirth: string | null;
+  @Column({ length: 200, nullable: true }) address: string | null;
+  @Column({ length: 30, nullable: true }) telephone: string | null;
+  @Column({ type: 'date', nullable: true }) dateOfBirth: string | null;
 
   @OneToMany(() => StudentGrade, (sg) => sg.student, { cascade: true })
   studentGrades: StudentGrade[];
@@ -62,18 +50,13 @@ export class Student {
   @OneToMany(() => TrainerReview, (tr) => tr.student, { cascade: true })
   trainerReviews: TrainerReview[];
 
-  // Join table auto-cleans when either side is deleted
+  // OWNER SIDE of M:N with explicit @JoinTable
+  // When TypeORM creates this join table, both FKs are ON DELETE CASCADE.
   @ManyToMany(() => Subject, (s) => s.students, { cascade: false })
   @JoinTable({
     name: 'student_subject',
-    joinColumn: {
-      name: 'studentId',
-      referencedColumnName: 'id',
-    },
-    inverseJoinColumn: {
-      name: 'subjectId',
-      referencedColumnName: 'id',
-    },
+    joinColumn: { name: 'studentId', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'subjectId', referencedColumnName: 'id' },
   })
   subjects: Subject[];
 }
