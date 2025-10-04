@@ -31,14 +31,13 @@ export class TrainerService {
   }
 
   async findOne(id: number): Promise<Trainer> {
-    try {
-      return await this.trainerRepository.findOneByOrFail({ id });
-    } catch (error) {
-      if (error.name === 'EntityNotFoundError') {
-        throw new NotFoundException(`Trainer with ID ${id} not found`);
-      }
-      throw error;
-    }
+    const trainer = await this.trainerRepository.findOne({
+      where: { id },
+      relations: { subjects: true, trainerReviews: true },
+    });
+    if (!trainer)
+      throw new NotFoundException(`Trainer with ID ${id} not found`);
+    return trainer;
   }
 
   async create(createTrainerDto: CreateTrainerDto): Promise<Trainer> {
