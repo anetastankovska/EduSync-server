@@ -49,7 +49,7 @@ export class StudentController {
   @ApiOperation({ summary: 'Update my student details' })
   @ApiOkResponse({ description: 'Student updated' })
   updateMe(@Req() req: any, @Body() dto: UpdateStudentDto) {
-    return this.studentService.updateByUserId(req.user.sub, dto);
+    return this.studentService.updateByUserId(req.user.userId, dto);
   }
 
   // ---------- COLLECTION & CREATE ----------

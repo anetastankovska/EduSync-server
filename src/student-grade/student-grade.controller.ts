@@ -39,6 +39,6 @@ export class StudentGradeController {
     @Body() dto: CreateStudentGradeDto,
     @Req() req: any,
   ) {
-    return this.service.createForStudent(studentId, req.user.sub, dto);
+    return this.service.createForStudent(studentId, req.user.userId, dto);
   }
 }

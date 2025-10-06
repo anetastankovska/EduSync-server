@@ -40,7 +40,7 @@ export class TrainerController {
   @ApiOperation({ summary: 'Get my trainer profile (by JWT user id)' })
   @ApiOkResponse({ type: Trainer, description: 'Trainer loaded' })
   getMe(@Req() req: any) {
-    return this.trainerService.findByUserId(req.user.sub);
+    return this.trainerService.findByUserId(req.user.userId);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -48,7 +48,7 @@ export class TrainerController {
   @ApiOperation({ summary: 'Update my trainer profile' })
   @ApiOkResponse({ type: Trainer, description: 'Trainer updated' })
   updateMe(@Req() req: any, @Body() dto: UpdateTrainerDto) {
-    return this.trainerService.updateByUserId(req.user.sub, dto);
+    return this.trainerService.updateByUserId(req.user.userId, dto);
   }
 
   @ApiOperation({

@@ -124,9 +124,9 @@ export class StudentService {
   }
 
   async findByUserId(userId: number) {
-    const s = await this.studentRepository.findOne({ where: { userId } });
-    if (!s) throw new NotFoundException('Student not found');
-    return s;
+    const student = await this.studentRepository.findOne({ where: { userId } });
+    if (!student) throw new NotFoundException('Student not found');
+    return student;
   }
 
   async updateByUserId(userId: number, dto: UpdateStudentDto) {

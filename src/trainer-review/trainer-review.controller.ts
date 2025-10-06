@@ -17,7 +17,6 @@ import { Roles } from 'src/decorators/roles.decorator';
 import { Role } from 'src/util/role.enum';
 import {
   ApiBearerAuth,
-  ApiCreatedResponse,
   ApiOkResponse,
   ApiOperation,
   ApiQuery,
@@ -42,7 +41,7 @@ export class TrainerReviewController {
     @Body() dto: CreateTrainerReviewDto, // now includes subjectId
     @Req() req: any,
   ) {
-    return this.service.createForTrainer(trainerId, req.user.sub, dto);
+    return this.service.createForTrainer(trainerId, req.user.userId, dto);
   }
   // List reviews for a trainer
   @ApiOperation({ summary: 'List reviews for a trainer' })
@@ -64,7 +63,7 @@ export class TrainerReviewController {
   @Get('me/trainer-reviews')
   @Roles(Role.Student, Role.Admin)
   listMine(@Req() req: any, @Query('studentId') studentId?: number) {
-    const id = studentId ?? req.user.sub;
+    const id = studentId ?? req.user.userId;
     return this.service.listByStudent(id);
   }
 }

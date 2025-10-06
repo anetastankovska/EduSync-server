@@ -56,10 +56,10 @@ export class StudentGradeService {
     if (
       (trainer.academyId &&
         student.academyId &&
-        trainer.academyId !== student.academyId) ||
+        trainer.academyId != student.academyId) ||
       (subject.academyId &&
         student.academyId &&
-        subject.academyId !== student.academyId)
+        subject.academyId != student.academyId)
     ) {
       throw new ForbiddenException(
         'Grades can only be recorded within your academy.',
